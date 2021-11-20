@@ -33,21 +33,9 @@ let quoteMetricLabel = (rawLabel) => {
     }) + "\"";
 };
 
-http.createServer(async (req, res) => {
+let fetchMetricLines = async () => {
     var lines = [];
 
-    if (req.url === "/") {
-        res.setHeader('X-App-Version', process.env.APP_VERSION || 'dev')
-        res.end('OK');
-        return ;
-    }
-
-    if (req.url !== "/metrics") {
-        res.setHeader('X-App-Version', process.env.APP_VERSION || 'dev')
-        res.writeHead(404);
-        res.end();
-        return ;
-    }
     try {
         const browser = await puppeteer.launch({args: ['--no-sandbox', '--disable-setuid-sandbox']});
         let urlLabel = quoteMetricLabel(process.env.URL);
@@ -125,6 +113,42 @@ http.createServer(async (req, res) => {
         await browser.close();
     } catch (error) {
         console.error(error);
+    }
+
+    return lines;
+};
+
+let fetchedLines = [];
+
+if (process.env.FETCH_MODE === "interval") {
+    setInterval(async () => {
+        fetchedLines = await fetchMetricLines();
+    }, parseInt(process.env.FETCH_INTERVAL_SECONDS, 10) * 1000);
+
+    setTimeout(async () => {
+        fetchedLines = await fetchMetricLines();
+    }, 0);
+}
+
+http.createServer(async (req, res) => {
+    if (req.url === "/") {
+        res.setHeader('X-App-Version', process.env.APP_VERSION || 'dev')
+        res.end('OK');
+        return ;
+    }
+
+    if (req.url !== "/metrics") {
+        res.setHeader('X-App-Version', process.env.APP_VERSION || 'dev')
+        res.writeHead(404);
+        res.end();
+        return ;
+    }
+
+    let lines = [];
+    if (process.env.FETCH_MODE === "interval") {
+        lines = fetchedLines;
+    } else {
+        lines = await fetchMetricLines();
     }
 
     res.setHeader('X-App-Version', process.env.APP_VERSION || 'dev')

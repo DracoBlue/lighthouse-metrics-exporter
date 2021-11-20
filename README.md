@@ -6,11 +6,21 @@ This project is capable of returning prometheus metrics for a lighthouse report 
 
 To make lighthouse-metrics-exporter work, you will need one environment variables set: `URL`.
 
-The `.env`:
+The `.env` (if you want to fetch the data ondemand):
 
 ```
 URL=https://example.org
 ```
+
+If you want to fetch the data in regulary use:
+
+```
+URL=https://example.org
+FETCH_MODE=interval
+FETCH_INTERVAL_SECONDS=900
+```
+
+and the data will be fetched every 900 seconds and immedatly returned if /metrics is called.
 
 ## Example Output
 
@@ -59,7 +69,6 @@ lighthouse_audit_first_meaningful_paint{url="https://example.org"} 965
 # HELP lighthouse_audit_speed_index Speed Index (in millisecond): Speed Index shows how quickly the contents of a page are visibly populated. [Learn more](https://web.dev/speed-index/).
 # TYPE lighthouse_audit_speed_index gauge
 lighthouse_audit_speed_index{url="https://example.org"} 1231
-# HELP lighthouse_audit_total_blocking_time Total Blocking Time (in millisecond): Sum of all time periods between FCP and Time to Interactive, when task length exceeded 50ms, expressed in milliseconds. [Learn more](https://web.dev/lighthouse-total-blocking-time/).
 ```
 ## Related projects
 
