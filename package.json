@@ -1,0 +1,16 @@
+{
+  "name": "lighthouse-metrics-exporter",
+  "description": "a metrics exporter for lighthouse",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^10.0.0",
+    "lighthouse": "^9.0.0",
+    "puppeteer": "^11.0.0"
+  }
+}
