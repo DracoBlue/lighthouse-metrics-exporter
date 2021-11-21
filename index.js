@@ -3,6 +3,8 @@ const http = require('http');
 const lighthouse = require('lighthouse');
 const puppeteer = require('puppeteer');
 
+let configName = process.env.CONFIG_NAME || 'default';
+
 process.on('unhandledRejection', function(err) {
     console.log(err);
     process.exit(1);
@@ -44,7 +46,7 @@ let fetchMetricLines = async () => {
             let results = await lighthouse(process.env.URL, {
                 port: require('url').parse(browser.wsEndpoint()).port,
                 output: 'json'
-            });
+            }, require('lighthouse/lighthouse-core/config/' + configName + '-config'));
 
             for(var categoryName in results.lhr.categories){
                 var category = results.lhr.categories[categoryName];
@@ -56,7 +58,7 @@ let fetchMetricLines = async () => {
                 }
                 lines.push('# HELP ' + categoryMetricName + ' ' + escapeHelpLabel(helpText));
                 lines.push('# TYPE ' + categoryMetricName + ' gauge');
-                lines.push(`${categoryMetricName}{url=${urlLabel}} ${category.score * 100}`);
+                lines.push(`${categoryMetricName}{config="${configName}",url=${urlLabel}} ${category.score * 100}`);
             }
 
 
@@ -86,7 +88,7 @@ let fetchMetricLines = async () => {
                     if (numericValue !== false) {
                         lines.push('# HELP ' +  auditMetricName + ' ' + escapeHelpLabel(helpText));
                         lines.push('# TYPE ' +  auditMetricName + ' gauge');
-                        lines.push(`${auditMetricName}{url=${urlLabel}} ${numericValue}`);
+                        lines.push(`${auditMetricName}{config="${configName}",url=${urlLabel}} ${numericValue}`);
                     }
                 }
 
@@ -102,7 +104,7 @@ let fetchMetricLines = async () => {
                     if (numericValue !== false) {
                         lines.push('# HELP ' +  auditMetricName + ' ' + escapeHelpLabel(helpText));
                         lines.push('# TYPE ' +  auditMetricName + ' gauge');
-                        lines.push(`${auditMetricName}{url=${urlLabel}} ${numericValue}`);
+                        lines.push(`${auditMetricName}{config="${configName}",url=${urlLabel}} ${numericValue}`);
                     }
                 }
             }
